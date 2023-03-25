@@ -1,0 +1,52 @@
+First part
+————————
+
+stock trader program
+
+Start $10,000
+There is 1 stock.
+It’s starting prices is $100.
+
+Here is what the output should look like:
+
+==== Day 1 ====
+
+Your money: $10,000
+
+Stocks: Apple: $100
+
+Would you like to buy (1) or sell (2)?
+1
+How many would you like to buy?
+7
+You bought 7 shares of Apple for $700.
+
+
+==== Day 2 ====
+
+Your money: $(changed from the purchases yesterday)
+
+Stocks: Apple: $110 +10%
+
+Your stocks: Apple: 7, value: $770
+
+Your net worth: $10,070
+
+
+Caveats: Stocks should go up or down randomly by a certain percent between (down 20% or up 30%).
+
+Also, it should handle every kind of invalid input.
+
+You will want to test it with various kinds of invalid inputs. Invaid inputs are both invalid types (letters, etc.) and invalid values (numbers out of range).
+
+
+Part 2
+———————————
+
+Program should take an optional argument (use sys.argv) which specifies how many companies there are available to buy. Valid numbers range 1-1000. 
+
+So essentially, your program should generate X number of companies (or 1 default) and they should be real company names.
+
+Each company’s stock should go up or down independently from each other.
+
+
