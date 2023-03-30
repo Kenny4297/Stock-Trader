@@ -14,54 +14,7 @@
     # Keeps track of each updated stock each day
         # Update the daily stock changes by 20% up or down. 
 
-#! Next Steps: Create a user Class and add the necessary variable
-
-#^ Example of a Python class
-# class Cat:
-#     def __init__(self, name, color, age):
-#         self.name = name
-#         self.color = color
-#         self.age = age
-    
-#     def meow(self):
-#         print("Meow! Meow!")
-    
-#     def get_name(self):
-#         return self.name
-    
-#     def get_color(self):
-#         return self.color
-    
-#     def get_age(self):
-#         return self.age
-
 import questionary, time, json
-
-class User:
-    def __init__(self, name, wallet):
-        self.name = name
-        # How much money the user will use to play in the stock market.
-        self.wallet = wallet
-
-    def get_name(self):
-        self.name = input("What is your name?")
-
-# # Game starts:
-# print("Hi there!")
-# time.sleep(1)
-
-# playedBefore = questionary.select(
-#     "Have you played before?",
-#     choices=[
-#     "Yes",
-#     "No"
-#     ]).ask()
-
-# print(f"You have answered {playedBefore}")
-
-# if (playedBefore != "Yes"):
-#     userName = input("What is your name?")
-#     # Create new instance with the users name here. Leave out the wallet information
 
 class User:
     def __init__(self, name=None, wallet=0):
@@ -72,6 +25,7 @@ class User:
         if self.name is None:
             self.name = input("What is your name? ")
 
+    # A testing method used to check the users name and wallet ammout
     def __str__(self):
         return f"Name: {self.name}, Wallet Balance: {self.wallet}"
 
@@ -79,6 +33,7 @@ class User:
 print("Hi there!")
 time.sleep(1)
 
+# Ask the user with 'questionary' list format
 played_before = questionary.select(
     "Have you played before?",
     choices=[
@@ -86,17 +41,51 @@ played_before = questionary.select(
         "No"
     ]).ask()
 
+# Testing
 print(f"You have answered {played_before}.")
 
 if played_before == "No":
-    user_name = User(name=None, wallet=0)
-    user_name.get_name()
-    print(f"Welcome, {user_name.name}! Your wallet balance is {user_name.wallet}.")
-    print(user_name)
+    #If the user has not played before, their user object will be stored in the json file
+
+    # Setting the new user to an instance of that object
+    user = User(name=None, wallet=0)
+
+    # Asking the user for their name and saving it to the 'name' parameter
+    user.get_name()
+
+    # Add the user name to the 'users.json' file
+
+    user = [{"name": user.name, "wallet": 0}]
+
+    # saving the user information to the database
+    with open("users.json", 'w') as file:
+        json.dump(user, file)
+
+    print(f"Welcome, {user.name}! Your wallet balance is {user.wallet}.")
+
+    #This prints the '__str__' method below for testing purposes
+    print(user)
 else:
+    with open('users.json', 'r') as file:
+        users = json.load(file)
+
+    user_names = [user["name"] for user in users]
+
     selectName = questionary.select(
-        
-    )
+        "Select your name:",
+        choices=user_names
+    ).ask()
+
+     # loop through the users in the database and find the matching name, and save that data as a user instance
+    selected_user = None
+    for user in users:
+        if user["name"] == selectName:
+            #assigning the data to an object instance we can now use in the rest of the application
+            selected_user = User(name=user['name'], wallet=user['wallet'])
+            break
+    user = selected_user
+    
+    print(f"The user selected data: {user}")
 
 
 
