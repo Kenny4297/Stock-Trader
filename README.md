@@ -25,6 +25,7 @@ Questionary for creating lists with user input. Perhaps using TKinter for a GUI?
 ## Features
 The program stores the user and stocks data in a JSON file, and can retrieve that information whenever is needed. The stocks value will change once a day cycle (when the user is done buying stocks that day), and can continue playing if he likes. Future plans on creating a 'high score' that ranks the players wallet after x number of days played?
 
+test?
 
 
 
