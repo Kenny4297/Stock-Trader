@@ -10,53 +10,6 @@ class User:
         if self.name is None:
             self.name = input("What is your name? ")
     
-    def buyStock(self):
-        # do here
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def buyStock(self):
-    #     todays_stocks = Stock.getTodaysStocks()
-    #     print(todays_stocks)
-
-    #     company_to_buy = questionary.select(
-    #         "What company would you like to buy?",
-    #         choices=[list(company.keys())[0] for company in todays_stocks]
-    #     ).ask()
-
-    #     # Find the selected company in the todays_stocks list and get its price
-    #     current_price = None
-    #     for company in todays_stocks:
-    #         if list(company.keys())[0] == company_to_buy:
-    #             current_price = list(company.values())[0]
-    #             break
-
-    #     number_of_stocks_to_buy = input("How many stocks would you like to buy")
-
-    #     self.user_stocks.append({
-    #         "company": company_to_buy,
-    #         "price": current_price,
-    #         "stocks purchased": number_of_stocks_to_buy
-    #     })
-
-        print(f"{self.user_stocks}")
-
-
-
-
-
     # A testing method used to check the users name and wallet amount
     def userStockInfo(self):
         """
@@ -65,9 +18,60 @@ class User:
         """
         print(f"Your current data: {self.wallet}, {self.user_stocks}")
 
+    def buyStock(self):
+        pass
+        # Get the list of stocks that are available for purchase
+        todays_stocks = Stock.getTodaysStocks()
+
+        # Get the company names ready
+        company_names = [list(company.keys())[0] for company in todays_stocks]
+
+        # Ask the user what company they would like to buy
+        company_to_purchase = questionary.select(
+            "What company would you like to buy?",
+            choices=[company_names]
+        ).ask()
+
+        # Ask how many they would like to buy
+        amount_to_purchase = int(input("How many would you like to purchase? "))
+
+        # Get the stock price of the company they bought
+        stock_price = None
+        for company in todays_stocks:
+            if list(company.keys())[0] == company_to_purchase:
+                stock_price = todays_stocks[company_to_purchase]
+                break
+
+        # Create a new 'stock' object that will be added to the json file that contains the array of users stocks
+        stock = {
+            "name": company_to_purchase,
+            "price": stock_price,
+            "amount": amount_to_purchase
+        }
+        # Open the json file
+
+        with open ('users.json', 'r') as file:
+            users = json.load(file)
+        
+        # Loop through the json file to find the correct user
+        for user in users:
+            if user['name'] == self.name:
+                if 'user_stocks':
+                    user['user_stocks'].append(stock)
+                else:
+                    user['user_stocks'] = [stock]
+                    break
+        
+        with open('users.json', 'w') as file:
+            json.dump(user, file)
+        
+        print(f"{user}")
+        
 
     def __str__(self):
-        return f"Name: {self.name}, Wallet Balance: {self.wallet}"
+        return f"Name: {self.name}, Wallet Balance: {self.wallet}, Stocks Purchased: {self.user_stocks}"
+    
+
     
 
 class Stock:
