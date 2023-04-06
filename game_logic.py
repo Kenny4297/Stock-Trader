@@ -16,5 +16,7 @@ def gameLogic(user):
 
     if user_action == 'Buy':
         user.buyStock()
-   
+    elif user_action == 'Sell':
+        user.sellStock()
+
     return

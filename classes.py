@@ -1,7 +1,9 @@
 import random, json, questionary
 
 class User:
-    def __init__(self, name=None, wallet=0, user_stocks=[]):
+    def __init__(self, name=None, wallet=0, user_stocks=None):
+        if user_stocks is None:
+            user_stocks = []
         self.name = name
         self.wallet = wallet
         self.user_stocks = user_stocks
@@ -19,54 +21,109 @@ class User:
         print(f"Your current data: {self.wallet}, {self.user_stocks}")
 
     def buyStock(self):
-        pass
-        # Get the list of stocks that are available for purchase
+
+        # First we need to get Today's available stocks. Remember that this returns a JSON object.
         todays_stocks = Stock.getTodaysStocks()
 
-        # Get the company names ready
-        company_names = [list(company.keys())[0] for company in todays_stocks]
-
-        # Ask the user what company they would like to buy
-        company_to_purchase = questionary.select(
-            "What company would you like to buy?",
-            choices=[company_names]
+        # Now we need to have the user select, from the stocks, the name of the company they would like to purchase
+        company_to_buy = questionary.select(
+            "Which company would you like to buy?",
+            # loop through the 'todays_stocks' and print out the keys as the choices
+            # Again, the [0] is targeting the companies 'name', which is the first key in the object
+            choices=[list(companies.keys())[0] for companies in todays_stocks]
         ).ask()
 
-        # Ask how many they would like to buy
-        amount_to_purchase = int(input("How many would you like to purchase? "))
+        amount_to_buy = int(input("How many stocks would you like to buy?"))
 
-        # Get the stock price of the company they bought
-        stock_price = None
+        # Now that a company is selected, we need to get its value
+
+        company_value = None
         for company in todays_stocks:
-            if list(company.keys())[0] == company_to_purchase:
-                stock_price = todays_stocks[company_to_purchase]
+            # The [0] here refers to the first key in the dictionary object, which is the company name
+            if list(company.keys())[0] == company_to_buy:
+                company_value = company[company_to_buy]
                 break
-
-        # Create a new 'stock' object that will be added to the json file that contains the array of users stocks
-        stock = {
-            "name": company_to_purchase,
-            "price": stock_price,
-            "amount": amount_to_purchase
-        }
-        # Open the json file
-
-        with open ('users.json', 'r') as file:
-            users = json.load(file)
         
-        # Loop through the json file to find the correct user
+        # Create the object that will be added to the 'user_stocks'
+        stock = {
+            "name": company_to_buy,
+            "price": company_value,
+            "amount": amount_to_buy
+        }
+
+        # Open the 'users.json' file 
+        with open('users.json', 'r') as file:
+            users = json.load(file)
+
+        # Find the correct user to add the user_stocks to
         for user in users:
             if user['name'] == self.name:
-                if 'user_stocks':
+
+                # Check if the user already has user_stocks
+                if 'user_stocks' in user:
                     user['user_stocks'].append(stock)
                 else:
                     user['user_stocks'] = [stock]
-                    break
-        
+                break
+            
         with open('users.json', 'w') as file:
-            json.dump(user, file)
-        
+            json.dump(users, file)
+
         print(f"{user}")
-        
+    
+    def sellStock(self):
+        # Open the 'users.json' file 
+        with open('users.json', 'r') as file:
+            users = json.load(file)
+
+        # Find the correct user in the json file
+        for user in users:
+            if user['name'] == self.name:
+                # Check if the user has any stocks to sell
+                if 'user_stocks' not in user:
+                    print("You have no stocks to sell!")
+                    return
+
+                # Prompt the user to select which stock they want to sell
+                stock_choices = [stock['name'] for stock in user['user_stocks']]
+                stock_to_sell = questionary.select(
+                    "Which stock do you want to sell?",
+                    choices=stock_choices
+                ).ask()
+
+                # Display the current number of shares the user owns
+                current_shares = next(stock['amount'] for stock in user['user_stocks'] if stock['name'] == stock_to_sell)
+                print(f"You currently own {current_shares} shares of {stock_to_sell}.")
+
+                # Prompt the user to enter how many shares they want to sell
+                stock_amount = questionary.text(
+                    f"How many shares of {stock_to_sell} do you want to sell?"
+                ).ask()
+
+                # Check if the user has enough shares to sell
+                for stock in user['user_stocks']:
+                    if stock['name'] == stock_to_sell:
+                        if stock['amount'] < int(stock_amount):
+                            print("You don't have enough shares to sell!")
+                            return
+
+                # Update the user's wallet and stocks
+                for stock in user['user_stocks']:
+                    if stock['name'] == stock_to_sell:
+                        stock_value = stock['price'] * int(stock_amount)
+                        user['wallet'] += stock_value
+                        stock['amount'] -= int(stock_amount)
+                        if stock['amount'] == 0:
+                            user['user_stocks'].remove(stock)
+
+                # Save the changes to the json file
+                with open('users.json', 'w') as file:
+                    json.dump(users, file)
+
+                print(f"You have sold {stock_amount} shares of {stock_to_sell} for {stock_value} dollars.")
+
+                return
+        print("User not found in users.json.")
 
     def __str__(self):
         return f"Name: {self.name}, Wallet Balance: {self.wallet}, Stocks Purchased: {self.user_stocks}"
